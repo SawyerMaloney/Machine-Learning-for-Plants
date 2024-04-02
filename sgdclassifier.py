@@ -31,13 +31,16 @@ D3_poly = PolynomialFeatures(degree).fit_transform(D3.data)
 
 print("Starting classifiers on polynomial features")
 M = SGDClassifier()
+print("fitting on D1_poly")
 M.fit(D1_poly.data, D1.target)
 print(f"Score on shape (poly): {M.score(D1_poly.data, D1.target)}")
 
 M = SGDClassifier()
+print("fitting on D2_poly")
 M.fit(D2_poly.data, D2.target)
 print(f"Score on margin (poly): {M.score(D2_poly.data, D2.target)}")
 
 M = SGDClassifier()
+print("fitting on D3_poly")
 M.fit(D3_poly.data, D3.target)
 print(f"Score on texture (poly): {M.score(D3_poly.data, D3.target)}")
