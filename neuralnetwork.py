@@ -7,7 +7,7 @@ D1 = fetch_openml("one-hundred-plants-shape", as_frame=False, parser="auto")
 D2 = fetch_openml("one-hundred-plants-margin", as_frame=False, parser="auto")
 D3 = fetch_openml("one-hundred-plants-texture", as_frame=False, parser="auto")
 
-for n in range(15, 50, 5):
+for n in range(25, 75, 5):
     print(f"testing on n {n}")
     clf = MLPClassifier(solver="lbfgs", hidden_layer_sizes=(n), max_iter=100000)
 # clf.fit(D3.data, D3.target)
