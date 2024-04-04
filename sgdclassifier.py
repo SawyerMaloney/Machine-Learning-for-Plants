@@ -37,6 +37,7 @@ M = SGDClassifier()
 scores = cross_val_score(M, D3.data, D3.target)
 print(f"Score on texture: {scores.mean()}, std: {scores.std()}")
 
+
 """
 degree = 3
 print("Calculating polynomial features of D1_poly")
