@@ -28,7 +28,7 @@ for fname in folders_path:
         #EDIT IMAGE SIZE HERE
         resized = cv2.resize(image, (300,300))
 
-        cv2.imwrite(os.path.join(f"{path}/{folders_names[j]}" , f"{i}.jpg"), resized)
+        cv2.imwrite(os.path.join(f"{path}/{folders_names[j]}" , f"{fname}{i}.jpg"), resized)
         i+=1
     j+=1
 
