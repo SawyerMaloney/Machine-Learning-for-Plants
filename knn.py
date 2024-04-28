@@ -1,72 +1,28 @@
-from sklearn.datasets import fetch_openml
 from sklearn.neighbors import KNeighborsClassifier
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
+from sklearn.datasets import fetch_openml
 import numpy as np
-from sklearn.inspection import DecisionBoundaryDisplay
-import seaborn as sns
+from sklearn.model_selection import cross_val_score
 
-def render(dataset):
-  D = fetch_openml(dataset,as_frame=False)
-  X = D.data[:, :2]
-  y = D.target
-  n_neighbors = 1
-  # clf = KNeighborsClassifier()
-  # clf.fit(X,y)
+datasets = ["one-hundred-plants-texture", "one-hundred-plants-margin", "one-hundred-plants-shape"]
+X_all, y_all = [], []
 
-  # https://stackoverflow.com/questions/45075638/graph-k-nn-decision-boundaries-in-matplotlib
-  # adapted  mostly from this, slight modifications
-  h = 0.01
+for dataset_name in datasets:
+    dataset = fetch_openml(dataset_name)
+    X = dataset.data
+    y = dataset.target
+    print(dataset)
+    X_all.append(X[:1599])
+    y_all.append(y)
 
-  cmap_light = ListedColormap(['orange', 'cyan', 'cornflowerblue'])
-  cmap_bold = ['darkorange', 'c', 'darkblue']
+X_combined = np.concatenate(X_all, axis=1)
+y_combined = y_all[0]
 
-  clf = KNeighborsClassifier(n_neighbors, weights='distance')
-  clf.fit(X, y)
+knn_model = KNeighborsClassifier(n_neighbors=5,  weights='distance')
 
-  x_min, x_max = X[:, 0].min(), X[:, 0].max()
-  y_min, y_max = X[:, 1].min(), X[:, 1].max()
-  xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-  np.arange(y_min, y_max, h))
-  Z = clf.predict(np.c_[xx.ravel(), yy.ravel()]).astype(int)
-  Z = Z.reshape(xx.shape)
-  plt.figure()
-  plt.contourf(xx, yy, Z, cmap=cmap_light)
+cv_scores = cross_val_score(knn_model, X_combined, y_combined, cv=5)
 
-  sns.scatterplot(x=X[:, 0], y=X[:, 1], palette=cmap_bold, alpha=1.0, edgecolor="black", size=1)
+mean_cv_score = np.mean(cv_scores)
+print("Out-sample:", mean_cv_score)
 
-  plt.xlim(xx.min(), xx.max())
-  plt.ylim(yy.min(), yy.max())
-
-  plt.title("3-Class classification (k = %i, 'uniform' = '%s')"
-  % (n_neighbors, 'uniform'))
-
-  plt.xlabel(D.feature_names[0])
-  plt.ylabel(D.feature_names[1])
-  plt.show()
-
-D = fetch_openml("one-hundred-plants-texture",as_frame=False)
-X = D.data[:, :2]
-y = D.target
-n_neighbors = 3
-
-scores = []
-for k in range(1, 6):
-  clf = KNeighborsClassifier(k, weights='uniform')
-  clf.fit(X, y)
-  scores.append(clf.score(X, y))
-
-plt.plot(range(1,6), scores)
-plt.show()
-
-scores = []
-for k in range(1,21,2):
-  clf = KNeighborsClassifier(k, weights='distance')
-  clf.fit(X, y)
-  scores.append(clf.score(X, y))
-
-plt.plot(range(1,21,2), scores)
-plt.show()
-
-render("one-hundred-plants-margin")
-render("one-hundred-plants-texture")
+in_sample_error = mean_cv_score
+print("In-sample", in_sample_error)
