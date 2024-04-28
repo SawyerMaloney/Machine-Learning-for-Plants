@@ -6,18 +6,20 @@ import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 import cv2
 
+#50x50: 40 epochs, batch size = 64, 80% accuracy
+#       70 epochs, batch size = 128, 80% accuracy
+
 
 # Step 1: Data Preparation
 # Define data transformations
 transform = transforms.Compose([
     transforms.Resize((50, 50)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 
 # Load dataset
 train_dataset = datasets.ImageFolder(root="C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/50x50", transform=transform)
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
 
 # Model Definition
 class CNN(nn.Module):
@@ -44,7 +46,7 @@ model = CNN().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-num_epochs = 10
+num_epochs = 30
 for epoch in range(num_epochs):
     for images, labels in train_loader:
         images, labels = images.to(device), labels.to(device)
@@ -53,12 +55,12 @@ for epoch in range(num_epochs):
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}')
+    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.6f}')
 
 #Testing
 # Load test dataset and evaluate the model on it
 test_dataset = datasets.ImageFolder(root="C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/50x50_test", transform=transform)
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
 model.eval()
 correct = 0
