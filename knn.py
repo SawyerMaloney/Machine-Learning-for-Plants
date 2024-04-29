@@ -10,7 +10,6 @@ for dataset_name in datasets:
     dataset = fetch_openml(dataset_name)
     X = dataset.data
     y = dataset.target
-    print(dataset)
     X_all.append(X[:1599])
     y_all.append(y)
 

@@ -1,65 +1,179 @@
 from sklearn.datasets import fetch_openml
 from sklearn.linear_model import SGDClassifier
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn import preprocessing
 from sklearn.model_selection import cross_val_score
 
 from matplotlib.pyplot import plot, show, xlabel, ylabel
 from random import choices
-from numpy import empty, unique
+from numpy import empty, unique, arange
+
+def test(d, loss, name, alpha=.0001):
+    M = SGDClassifier(loss=loss, n_jobs=-1, alpha=alpha)
+    M.fit(d.data, d.target)
+    score = M.score(d.data, d.target)
+    print(f"Score on {name}: {score}")
+    return score
+
+def out_of_sample_test(d, loss, name, alpha=.0001):
+    M = SGDClassifier(loss=loss, n_jobs=-1, alpha=alpha)
+    scores = cross_val_score(M, d.data, d.target)
+    print(f"Score on {name}: {scores.mean()}, std: {scores.std()}")
+    return scores.mean()
+
 
 D1 = fetch_openml("one-hundred-plants-shape", as_frame=False, parser="auto")
 D2 = fetch_openml("one-hundred-plants-margin", as_frame=False, parser="auto")
 D3 = fetch_openml("one-hundred-plants-texture", as_frame=False, parser="auto")
 
-M = SGDClassifier()
-M.fit(D1.data, D1.target)
-print(f"Score on shape: {M.score(D1.data, D1.target)}")
+loss_functions = ["hinge", "log_loss", "modified_huber", "perceptron"]
 
-M = SGDClassifier()
-M.fit(D2.data, D2.target)
-print(f"Score on margin: {M.score(D2.data, D2.target)}")
+sample = []
 
-M = SGDClassifier()
-M.fit(D3.data, D3.target)
-print(f"Score on texture: {M.score(D3.data, D3.target)}")
+for loss in loss_functions:
+    print(f"------------------- testing on {loss} function -------------------")
+    in_sample = []
+    in_sample.append(test(D1, loss, "shape"))
+    in_sample.append(test(D2, loss, "margin"))
+    in_sample.append(test(D3, loss, "texture"))
 
-print(f"Out of sample estimation starting")
+    print(f"Out of sample estimation starting")
+    out_sample = []
+    out_sample.append(out_of_sample_test(D1, loss, "shape"))
+    out_sample.append(out_of_sample_test(D2, loss, "margin"))
+    out_sample.append(out_of_sample_test(D3, loss, "texture"))
+    
+    sample.append((in_sample, out_sample))
 
-M = SGDClassifier()
-scores = cross_val_score(M, D1.data, D1.target)
-print(f"Score on shape: {scores.mean()}, std: {scores.std()}")
+print("------------------- testing on scaled data -------------------")
 
-M = SGDClassifier()
-scores = cross_val_score(M, D2.data, D2.target)
-print(f"Score on margin: {scores.mean()}, std: {scores.std()}")
+# making scalers for each dataset
+scaler_shape = preprocessing.StandardScaler().fit(D1.data)
+scaler_margin = preprocessing.StandardScaler().fit(D2.data)
+scaler_texture = preprocessing.StandardScaler().fit(D3.data)
 
-M = SGDClassifier()
-scores = cross_val_score(M, D3.data, D3.target)
-print(f"Score on texture: {scores.mean()}, std: {scores.std()}")
+# scaling datasets
+D1.data = scaler_shape.transform(D1.data)
+D2.data = scaler_margin.transform(D2.data)
+D3.data = scaler_texture.transform(D3.data)
+
+sample_scaled = []
+
+for loss in loss_functions:
+    print(f"------------------- testing on {loss} function -------------------")
+    in_sample = []
+    in_sample.append(test(D1, loss, "shape"))
+    in_sample.append(test(D2, loss, "margin"))
+    in_sample.append(test(D3, loss, "texture"))
+
+    print(f"Out of sample estimation starting")
+    out_sample = []
+    out_sample.append(out_of_sample_test(D1, loss, "shape"))
+    out_sample.append(out_of_sample_test(D2, loss, "margin"))
+    out_sample.append(out_of_sample_test(D3, loss, "texture"))
+
+    sample_scaled.append((in_sample, out_sample))
+
+with open("sgdout.csv", "w") as f:
+    f.write("non-scaled data:\n")
+    for loss in range(len(sample)):
+        f.write(f"{loss_functions[loss]}\n")
+        f.write(f",shape, margin, texture\n")
+        f.write(f"in sample, {sample[loss][0][0]}, {sample[loss][0][1]},{sample[loss][0][2]}\n")
+        f.write(f"out of sample, {sample[loss][1][0]}, {sample[loss][1][1]},{sample[loss][1][2]}\n")
+
+    f.write("scaled data:\n")
+    for loss in range(len(sample_scaled)):
+        f.write(f"{loss_functions[loss]}\n")
+        f.write(f",shape, margin, texture\n")
+        f.write(f"in sample, {sample_scaled[loss][0][0]}, {sample_scaled[loss][0][1]},{sample_scaled[loss][0][2]}\n")
+        f.write(f"out of sample, {sample_scaled[loss][1][0]}, {sample_scaled[loss][1][1]},{sample_scaled[loss][1][2]}\n")
 
 
-"""
-degree = 3
-print("Calculating polynomial features of D1_poly")
-D1_poly = PolynomialFeatures(degree).fit_transform(D1.data) 
-print("Calculating polynomial features of D2_poly")
-D2_poly = PolynomialFeatures(degree).fit_transform(D2.data) 
-print("Calculating polynomial features of D3_poly")
-D3_poly = PolynomialFeatures(degree).fit_transform(D3.data) 
 
-print("Starting classifiers on polynomial features")
-M = SGDClassifier()
-print("fitting on D1_poly")
-M.fit(D1_poly.data, D1.target)
-print(f"Score on shape (poly): {M.score(D1_poly.data, D1.target)}")
 
-M = SGDClassifier()
-print("fitting on D2_poly")
-M.fit(D2_poly.data, D2.target)
-print(f"Score on margin (poly): {M.score(D2_poly.data, D2.target)}")
 
-M = SGDClassifier()
-print("fitting on D3_poly")
-M.fit(D3_poly.data, D3.target)
-print(f"Score on texture (poly): {M.score(D3_poly.data, D3.target)}")
-"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
