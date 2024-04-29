@@ -5,7 +5,7 @@ from sklearn.model_selection import cross_val_score
 
 from matplotlib.pyplot import plot, show, xlabel, ylabel
 from random import choices
-from numpy import empty, unique, arange
+from numpy import empty, unique, arange, concatenate
 
 def test(d, loss, name, alpha=.0001):
     M = SGDClassifier(loss=loss, n_jobs=-1, alpha=alpha)
@@ -25,6 +25,36 @@ D1 = fetch_openml("one-hundred-plants-shape", as_frame=False, parser="auto")
 D2 = fetch_openml("one-hundred-plants-margin", as_frame=False, parser="auto")
 D3 = fetch_openml("one-hundred-plants-texture", as_frame=False, parser="auto")
 
+# Testing the datasets for margin and texture
+print("-------------------- testing concat on data --------------------")
+d = concatenate((D2.data[:1599], D3.data), axis=1)
+class container:
+    def __init__(self, data, target):
+        self.data = data
+        self.target = target
+D = container(d, D3.target)
+test(D, "modified_huber", "concatenate")
+out_of_sample_test(D, "modified_huber", "concatenate")
+
+# making scalers for each dataset
+scaler_shape = preprocessing.StandardScaler().fit(D1.data)
+scaler_margin = preprocessing.StandardScaler().fit(D2.data)
+scaler_texture = preprocessing.StandardScaler().fit(D3.data)
+
+# scaling datasets
+D1.data = scaler_shape.transform(D1.data)
+D2.data = scaler_margin.transform(D2.data)
+D3.data = scaler_texture.transform(D3.data)
+
+# testing concatenate on scaled data
+print("-------------------- testing concat on scaled data --------------------")
+d = concatenate((D2.data[:1599], D3.data), axis=1)
+D = container(d, D3.target)
+test(D, "modified_huber", "concatenate")
+out_of_sample_test(D, "modified_huber", "concatenate")
+
+# Testing multiple loss functions
+""" 
 loss_functions = ["hinge", "log_loss", "modified_huber", "perceptron"]
 
 sample = []
@@ -87,7 +117,7 @@ with open("sgdout.csv", "w") as f:
         f.write(f",shape, margin, texture\n")
         f.write(f"in sample, {sample_scaled[loss][0][0]}, {sample_scaled[loss][0][1]},{sample_scaled[loss][0][2]}\n")
         f.write(f"out of sample, {sample_scaled[loss][1][0]}, {sample_scaled[loss][1][1]},{sample_scaled[loss][1][2]}\n")
-
+""" 
 
 
 
