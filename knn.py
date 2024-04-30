@@ -10,9 +10,8 @@ for dataset_name in datasets:
     dataset = fetch_openml(dataset_name)
     X = dataset.data
     y = dataset.target
-    print(dataset)
     X_all.append(X[:1599])
-    y_all.append(y)
+    y_all.append(y )
 
 X_combined = np.concatenate(X_all, axis=1)
 y_combined = y_all[0]
@@ -24,5 +23,7 @@ cv_scores = cross_val_score(knn_model, X_combined, y_combined, cv=5)
 mean_cv_score = np.mean(cv_scores)
 print("Out-sample:", mean_cv_score)
 
-in_sample_error = mean_cv_score
-print("In-sample", in_sample_error)
+knn_model.fit(X_combined, y_combined)
+print("In-sample", np.mean(knn_model.score(X_combined, y_combined)))
+
+
