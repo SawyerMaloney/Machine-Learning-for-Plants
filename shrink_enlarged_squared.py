@@ -5,8 +5,8 @@ import os
 import random
 
 #ADJUST PATHS ACCORDING TO YOUR LOCAL PATHS
-directory = "C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/images_enlarged"
-path = 'C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/test_images'
+directory = "C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/enlarged_squared"
+path = 'C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/50x50'
 
 
 folders_path = []
@@ -32,11 +32,11 @@ j = 0
 x = 0
 for fname in folders_path:
     rand_list=[]
-    """while len(rand_list)!=2:
+    while len(rand_list)!=2: # EDIT THIS NUMBER TO ADJUST NUMBER OF IMAGES PER CLASS IN TESTING SET
         x = random.randint(1,16)
         if x not in rand_list:
             rand_list.append(x)
-    print(rand_list)"""
+    print(rand_list)
     i = 1
     for img in os.listdir(fname):    
         image = cv2.imread(f"{fname}/{img}",0)
