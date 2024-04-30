@@ -6,8 +6,8 @@ import cv2
 from pathlib import Path
 import os
 
-directory = "C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/archive/data/data"
-path = 'C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/enlarged_squared'
+directory = "C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/images"
+path = 'C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/images_enlarged'
 
 
 folders_path = []

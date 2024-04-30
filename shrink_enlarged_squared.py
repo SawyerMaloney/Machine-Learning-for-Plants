@@ -5,8 +5,8 @@ import os
 import random
 
 #ADJUST PATHS ACCORDING TO YOUR LOCAL PATHS
-directory = "C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/enlarged_squared"
-path = 'C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/50x50'
+directory = "C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/images_enlarged"
+path = 'C:/Users/sonan/OneDrive/Documents/GitHub/Machine-Learning-for-Plants/test_images'
 
 
 folders_path = []
@@ -31,14 +31,22 @@ i = 1
 j = 0
 x = 0
 for fname in folders_path:
+    rand_list=[]
+    """while len(rand_list)!=2:
+        x = random.randint(1,16)
+        if x not in rand_list:
+            rand_list.append(x)
+    print(rand_list)"""
     i = 1
-    x = random.randint(1,16)    
     for img in os.listdir(fname):    
         image = cv2.imread(f"{fname}/{img}",0)
+        _, binary_image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)
+
         #EDIT IMAGE SIZE HERE
         resized = cv2.resize(image, (50,50))
-        if i== x:
-            cv2.imwrite(f"{path}_test/{folders_names[j]}/{folders_names[j]}_{x}.jpg", resized)
+        if i in rand_list:
+            print("True")
+            cv2.imwrite(f"{path}_test/{folders_names[j]}/{folders_names[j]}_{i}.jpg", resized)
         else:
             cv2.imwrite(f"{path}/{folders_names[j]}/{folders_names[j]}_{i}.jpg", resized)
         i+=1
